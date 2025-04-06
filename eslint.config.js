@@ -7,8 +7,6 @@ export default defineConfig([
   {
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
       globals: globals.node // or `globals.browser` if running in browser
     },
     plugins: { 'simple-import-sort': simpleImportSort },
