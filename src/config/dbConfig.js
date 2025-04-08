@@ -18,3 +18,4 @@ export default async function connectDB() {
     console.log('Error Connecting the database!', error)
   }
 }
+
