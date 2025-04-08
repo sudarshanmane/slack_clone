@@ -16,6 +16,7 @@ import {
   internalServerErrorResponse,
   successReponse
 } from '../utils/common/customObjects.js';
+import ClientError from '../utils/errors/clientErrors.js';
 import { handleError } from '../utils/utils.js';
 
 export const userLoginController = async (req, res, next) => {
@@ -23,7 +24,11 @@ export const userLoginController = async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      throw { status: 400, message: 'Invalid Credentials!' };
+      throw new ClientError({
+        explanation: ['Email and Password not sent by client!'],
+        message: 'Email and password is required!',
+        StatusCode: StatusCodes.BAD_REQUEST
+      });
     }
 
     const response = await userLoginService(email, password);
@@ -34,7 +39,13 @@ export const userLoginController = async (req, res, next) => {
       data: response
     });
   } catch (error) {
-    handleError(error, res);
+    if (error.StatusCodes) {
+      return res.status(error.statusCode).json(customErrorResponse(error));
+    }
+
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(customErrorResponse(error));
   }
 };
 

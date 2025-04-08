@@ -1,3 +1,6 @@
+import { StatusCodes } from 'http-status-codes';
+
+import ClientError from '../utils/errors/clientErrors.js';
 import ValidationError from '../utils/errors/validationErrors.js';
 import { generateJwtToken, validateBcryptPassword } from '../utils/utils.js';
 import userRepository from './../d_repository/userRepository.js';
@@ -35,22 +38,22 @@ export const userLoginService = async (email, password) => {
   try {
     const userExists = await userRepository.getUserByEmail(email);
 
-    const errorMessage = {
-      status: 400,
-      message: 'Invalid Credentials!'
-    };
-
     if (!userExists) {
-      throw errorMessage;
+      throw new ClientError({
+        explanation: ['Invalid Details'],
+        message: 'No Registered User found with this email',
+        StatusCode: StatusCodes.NOT_FOUND
+      });
     }
 
-    const checkPassword = await validateBcryptPassword(
-      password,
-      userExists.password
-    );
+    const checkPassword = validateBcryptPassword(password, userExists.password);
 
     if (!checkPassword) {
-      throw { ...errorMessage, message: 'Invalid Password!' };
+      throw new ClientError({
+        explanation: ['Invalid Data sent from the client'],
+        message: 'Invalid Password!',
+        statusCode: StatusCodes.BAD_REQUEST
+      });
     } else {
       const token = generateJwtToken({
         id: userExists._id,
@@ -155,6 +158,7 @@ export const updateUserByIdService = async (id, user) => {
 export const deleteUserByIdService = async (id) => {
   try {
     const delUser = await userRepository.delete(id);
+
     if (!delUser) {
       throw {
         message: 'User Not Found!',

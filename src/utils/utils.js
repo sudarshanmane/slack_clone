@@ -19,7 +19,7 @@ export const handleError = (error, res) => {
 };
 
 export const generateJwtToken = (payload) => {
-  return jwt.sign(payload, JWT_SCERET, { expiresIn: '1d' });
+  return jwt.sign(payload, JWT_SCERET, { expiresIn: '1000' });
 };
 
 export const verifyJwtToken = (token) => {
@@ -30,7 +30,7 @@ export const verifyJwtToken = (token) => {
   }
 };
 
-export const validateBcryptPassword = async (password, bcryptedPassword) => {
-  const result = await bcrypt.compare(password, bcryptedPassword);
+export const validateBcryptPassword = (password, bcryptedPassword) => {
+  const result = bcrypt.compareSync(password, bcryptedPassword);
   return result;
 };
