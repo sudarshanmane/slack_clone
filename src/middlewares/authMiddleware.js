@@ -2,12 +2,13 @@ import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
 
 import { JWT_SCERET } from '../config/serverConfig.js';
+import userRepository from '../d_repository/userRepository.js';
 import {
   customErrorResponse,
   internalServerErrorResponse
 } from '../utils/common/customObjects.js';
 
-export const isAuthenticated = (req, res, next) => {
+export const isAuthenticated = async (req, res, next) => {
   try {
     const token = req.headers['x-access-token'];
     if (!token) {
@@ -29,6 +30,8 @@ export const isAuthenticated = (req, res, next) => {
         })
       );
     }
+
+    req.user = await userRepository.findById(response.id);
 
     next();
   } catch (error) {

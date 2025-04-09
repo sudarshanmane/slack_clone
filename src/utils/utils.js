@@ -19,7 +19,7 @@ export const handleError = (error, res) => {
 };
 
 export const generateJwtToken = (payload) => {
-  return jwt.sign(payload, JWT_SCERET, { expiresIn: '1000' });
+  return jwt.sign(payload, JWT_SCERET, { expiresIn: '100d' });
 };
 
 export const verifyJwtToken = (token) => {
