@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import Workspace from '../a_schama/workspaceSchema.js';
 import ClientError from '../utils/errors/clientErrors.js';
+import { isUserAdminOfTheWorkspace } from '../utils/utils.js';
 import channelRepository from './channelRepository.js';
 import crudRepository from './crudRepository.js';
 
@@ -11,44 +12,22 @@ const workspaceRepository = {
     const workspace = await Workspace.findOne({ name });
     return workspace;
   },
+
   getWorkspaceByJoinCode: async (joinCode) => {
     const workspace = await Workspace.findOne({ joinCode });
     return workspace;
   },
-  addMemberToWorkspace: async (workspaceId, memberId, role) => {
-    const workspace = await Workspace.findById(workspaceId);
 
-    if (!workspace) {
-      throw new ClientError({
-        explanation: ['Invalid data sent from the client!'],
-        message: 'Workspace not found!',
-        statusCode: StatusCodes.NOT_FOUND
-      });
-    }
-
-    const isUserAlreadyPartOfWorkspace = workspace.members.find(
-      (el) => el.memberId === memberId
-    );
-
-    if (isUserAlreadyPartOfWorkspace) {
-      throw new ClientError({
-        explanation: ['Invalid data sent from the client!'],
-        message: 'Meber is already part of the workspace!',
-        statusCode: StatusCodes.FORBIDDEN
-      });
-    }
-
+  addMemberToWorkspace: async (workspace, memberId, role) => {
     workspace.members.push({ memberId, role });
 
     await workspace.save();
 
     return workspace;
   },
-  addChannelToWorkspace: async (workspaceId, channelName) => {
-    const workspace = await Workspace.findById(workspaceId).populate({
-      path: 'channels',
-      select: 'name'
-    });
+
+  addChannelToWorkspace: async (workspaceId, channelName, userId) => {
+    const workspace = await Workspace.findById(workspaceId);
 
     if (!workspace) {
       throw new ClientError({
@@ -57,6 +36,13 @@ const workspaceRepository = {
         statusCode: StatusCodes.NOT_FOUND
       });
     }
+
+    await workspace.populate({
+      path: 'channels',
+      select: 'name'
+    });
+
+    await isUserAdminOfTheWorkspace(workspace, userId);
 
     const isChannelAlreadyPartOfWorkspace = workspace.channels.find(
       (el) => el.name === channelName
@@ -75,6 +61,8 @@ const workspaceRepository = {
     workspace.channels.push(channle._id);
 
     await workspace.save();
+
+    console.log('workspace saved', workspace);
 
     return workspace;
   },

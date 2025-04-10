@@ -1,14 +1,18 @@
 import { StatusCodes } from 'http-status-codes';
-import random from 'random-string-generator';
 
 import {
+  addChannelToWorkspaceService,
   addMemberToWorkspaceService,
   createWorkspceSpaceService,
+  deleteWorkspaceService,
+  findAllWorkspaceByMembersService,
   getALLWorkSpaceService,
+  getUserWorkspacesService,
   getWorkSpaceByIdService,
   getWorkSpaceByJoinCodeService,
   getWorkSpaceByNameService
 } from '../c_service/workspaceService.js';
+import workspaceRepository from '../d_repository/workspaceRepository.js';
 import {
   customErrorResponse,
   successReponse
@@ -34,14 +38,12 @@ export const getALLWorkSpaceController = async (req, res, next) => {
 
 export const createWorkspceSpaceController = async (req, res, next) => {
   try {
-    const joinCode = random(8, 'lower');
     const memberId = req.user._id;
     const role = 'admin';
 
     const workspace = await createWorkspceSpaceService({
       ...req.body,
-      members: [{ memberId, role }],
-      joinCode
+      members: [{ memberId, role }]
     });
 
     return res
@@ -62,16 +64,44 @@ export const addMemberToWorkspaceController = async (req, res, next) => {
   try {
     const workspaceId = req.params.id;
     const { memberId, role } = req.body;
+    const userId = req.user._id;
 
     const workspace = await addMemberToWorkspaceService(
       workspaceId,
       memberId,
-      role
+      role,
+      userId
     );
 
     return res
       .status(StatusCodes.OK)
       .json(successReponse(workspace, 'Workspaec Updated Successfully!'));
+  } catch (error) {
+    return res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(customErrorResponse(error));
+  }
+};
+
+export const addChannelToWorkspaceController = async (req, res, next) => {
+  try {
+    const workspaceId = req.params.id;
+    const { name } = req.body;
+
+    const workspace = await addChannelToWorkspaceService(
+      workspaceId,
+      name,
+      req.user._id
+    );
+
+    return res
+      .status(StatusCodes.OK)
+      .json(
+        successReponse(
+          workspace,
+          'Channel Added to the workspace Successfully!'
+        )
+      );
   } catch (error) {
     return res
       .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
@@ -129,6 +159,57 @@ export const getWorkSpaceByIdController = async (req, res, next) => {
 
     return res
       .status(error.StatusCodes || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(customErrorResponse(error));
+  }
+};
+
+export const getALLWorkSpaceByMemberIdController = async (req, res) => {
+  try {
+    const memberId = req.params.id;
+
+    const workspaces = await findAllWorkspaceByMembersService(memberId);
+
+    return res
+      .status(StatusCodes.OK)
+      .json(successReponse(workspaces, 'Workspaces successfully fetched!'));
+  } catch (error) {
+    return res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(customErrorResponse(error));
+  }
+};
+
+export const deleteWorkspaceController = async (req, res) => {
+  try {
+    const workspaceId = req.params.id;
+    const userId = req.user._id;
+    const workspace = await deleteWorkspaceService(userId, workspaceId);
+
+    return res
+      .status(StatusCodes.OK)
+      .json(successReponse(workspace, 'Workspace deleted successfully!'));
+  } catch (error) {
+    console.log('error', error);
+    return res
+      .status(error.statusCode || error.INTERNAL_SERVER_ERROR)
+      .json(customErrorResponse(error));
+  }
+};
+
+export const getUserWorkspaceController = async (req, res) => {
+  try {
+    const workspaceId = req.params.id;
+    const userId = req.user._id;
+
+    const workspaces = await getUserWorkspacesService(workspaceId, userId);
+
+    return res
+      .status(StatusCodes.OK)
+      .json(successReponse(workspaces, 'Workspaces Fetched Successfully!'));
+  } catch (error) {
+    console.log('Error while getting the user workspaces!', error);
+    return res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
       .json(customErrorResponse(error));
   }
 };

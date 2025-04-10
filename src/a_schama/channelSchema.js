@@ -4,9 +4,7 @@ const channelSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Channel name is required!'],
-      minlength: [3, 'Channel name must be least 3 chars!'],
-      unique: true
+      required: [true, 'Channel name is required!']
     }
   },
   { timestamps: true }
