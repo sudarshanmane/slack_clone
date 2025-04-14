@@ -1,41 +1,20 @@
+import { tryCatch } from 'bullmq';
 import { StatusCodes } from 'http-status-codes';
 import { v4 as uuidv4 } from 'uuid';
 
 import channelRepository from '../d_repository/channelRepository.js';
 import userRepository from '../d_repository/userRepository.js';
 import workspaceRepository from '../d_repository/workspaceRepository.js';
+import { addEmailToMailQueue } from '../producer/mailQueueProducer.js';
 import { customErrorResponse } from '../utils/common/customObjects.js';
+import { workspaceJoinMail } from '../utils/common/mailObject.js';
 import ClientError from '../utils/errors/clientErrors.js';
 import ValidationError from '../utils/errors/validationErrors.js';
-import { isUserAdminOfTheWorkspace } from '../utils/utils.js';
-
-const isWorkspaceExistsFun = async (workspaceId) => {
-  const workspace = await workspaceRepository.findById(workspaceId);
-
-  if (!workspace) {
-    throw new ClientError({
-      explanation: 'Invalid data sent from the client!',
-      message: 'Workspace not found',
-      statusCode: StatusCodes.NOT_FOUND
-    });
-  }
-
-  return workspace;
-};
-
-const isUserMemberOfWorkspace = (workspace, userId) => {
-  const isMember = workspace.members.find((el) => {
-    return el?.memberId.toString() === userId.toString();
-  });
-
-  if (!isMember) {
-    throw new ClientError({
-      explanation: 'User not part of the workspace!',
-      message: 'U are not part of the workspace!',
-      statusCodes: StatusCodes.UNAUTHORIZED
-    });
-  }
-};
+import {
+  isUserAdminOfTheWorkspace,
+  isUserMemberOfWorkspace,
+  isWorkspaceExistsFun
+} from '../utils/utils.js';
 
 export const getALLWorkSpaceService = async (limit, offset) => {
   try {
@@ -61,7 +40,7 @@ export const getUserWorkspacesService = async (workspaceId, userId) => {
   }
 };
 
-export const createWorkspceSpaceService = async (workspaceObj) => {
+export const createWorkspceSpaceService = async (workspaceObj, userId) => {
   try {
     const joinCode = uuidv4().substring(0, 6);
 
@@ -72,8 +51,10 @@ export const createWorkspceSpaceService = async (workspaceObj) => {
 
     let updatedWorkspace = await workspaceRepository.addChannelToWorkspace(
       workspace._id,
-      'general'
+      'general',
+      userId
     );
+
     return updatedWorkspace;
   } catch (error) {
     console.log('error while creating tbe workspace!', error);
@@ -101,9 +82,9 @@ export const addMemberToWorkspaceService = async (
   try {
     const workspace = await isWorkspaceExistsFun(workSpaceId);
 
-    const memberCheck = await userRepository.findById(memberId);
+    const isValidUser = await userRepository.findById(memberId);
 
-    if (!memberCheck) {
+    if (!isValidUser) {
       throw new ClientError({
         statusCode: StatusCodes.NOT_FOUND,
         explanation: ['Provided incorrect member details!'],
@@ -114,7 +95,7 @@ export const addMemberToWorkspaceService = async (
     isUserAdminOfTheWorkspace(workspace, userId);
 
     const isUserAlreadyPartOfWorkspace = workspace.members.find(
-      (el) => el.memberId === memberId
+      (el) => el.memberId.toString() === memberId.toString()
     );
 
     if (isUserAlreadyPartOfWorkspace) {
@@ -130,6 +111,11 @@ export const addMemberToWorkspaceService = async (
       memberId,
       role
     );
+
+    addEmailToMailQueue({
+      ...workspaceJoinMail(workspace.name),
+      to: isValidUser.email
+    });
 
     return updatedWorkspace;
   } catch (error) {
@@ -211,6 +197,24 @@ export const findAllWorkspaceByMembersService = async (memberId) => {
       await workspaceRepository.fetchAllWorkspaceByMemeberId(memberId);
 
     return workspaces;
+  } catch (error) {
+    console.log('error occurred in findAllWorkspaceByMembers', error);
+    throw error;
+  }
+};
+
+export const updateWorkspaceService = async (workspaceId, data) => {
+  try {
+    const workspace = await isWorkspaceExistsFun(workspaceId);
+
+    isUserAdminOfTheWorkspace(workspace);
+
+    const updatedWorkspace = await workspaceRepository.update(
+      workspaceId,
+      data
+    );
+
+    return updatedWorkspace;
   } catch (error) {
     console.log('error occurred in findAllWorkspaceByMembers', error);
     throw error;

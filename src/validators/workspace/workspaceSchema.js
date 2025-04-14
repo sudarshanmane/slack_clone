@@ -5,3 +5,7 @@ const workspaceZodSchema = z.object({
 });
 
 export default workspaceZodSchema;
+
+export const channelZodSchema = z.object({
+  name: z.string().min(3).max(50)
+});

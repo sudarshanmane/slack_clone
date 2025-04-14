@@ -10,7 +10,8 @@ import {
   getUserWorkspaceController,
   getWorkSpaceByIdController,
   getWorkSpaceByJoinCodeController,
-  getWorkSpaceByNameController
+  getWorkSpaceByNameController,
+  updateWorkspaceController
 } from '../../b_controllers/workspaceController.js';
 import { isAuthenticated } from '../../middlewares/authMiddleware.js';
 import channelZodSchema from '../../validators/channel/channelSchema.js';
@@ -29,7 +30,7 @@ workspaceRouter
   .get(isAuthenticated, getWorkSpaceByJoinCodeController);
 
 workspaceRouter
-  .route('/add-channel/:id')
+  .route('/:id/add-channel')
   .put(
     isAuthenticated,
     validate(channelZodSchema),
@@ -37,7 +38,7 @@ workspaceRouter
   );
 
 workspaceRouter
-  .route('/add-member/:id')
+  .route('/:id/add-member')
   .put(
     isAuthenticated,
     validate(workspaceMemberZodSchema),
@@ -51,7 +52,8 @@ workspaceRouter
 workspaceRouter
   .route('/:id')
   .get(isAuthenticated, getWorkSpaceByIdController)
-  .delete(isAuthenticated, deleteWorkspaceController);
+  .delete(isAuthenticated, deleteWorkspaceController)
+  .put(isAuthenticated, updateWorkspaceController);
 
 workspaceRouter
   .route('/get-member-workspaces/:id')

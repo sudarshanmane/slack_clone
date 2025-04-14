@@ -10,14 +10,13 @@ import {
   getUserWorkspacesService,
   getWorkSpaceByIdService,
   getWorkSpaceByJoinCodeService,
-  getWorkSpaceByNameService
+  getWorkSpaceByNameService,
+  updateWorkspaceService
 } from '../c_service/workspaceService.js';
-import workspaceRepository from '../d_repository/workspaceRepository.js';
 import {
   customErrorResponse,
   successReponse
 } from '../utils/common/customObjects.js';
-import ClientError from '../utils/errors/clientErrors.js';
 
 export const getALLWorkSpaceController = async (req, res, next) => {
   try {
@@ -41,10 +40,13 @@ export const createWorkspceSpaceController = async (req, res, next) => {
     const memberId = req.user._id;
     const role = 'admin';
 
-    const workspace = await createWorkspceSpaceService({
-      ...req.body,
-      members: [{ memberId, role }]
-    });
+    const workspace = await createWorkspceSpaceService(
+      {
+        ...req.body,
+        members: [{ memberId, role }]
+      },
+      memberId
+    );
 
     return res
       .status(StatusCodes.CREATED)
@@ -75,7 +77,9 @@ export const addMemberToWorkspaceController = async (req, res, next) => {
 
     return res
       .status(StatusCodes.OK)
-      .json(successReponse(workspace, 'Workspaec Updated Successfully!'));
+      .json(
+        successReponse(workspace, 'Member add to the Workspace Successfully!')
+      );
   } catch (error) {
     return res
       .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
@@ -183,6 +187,7 @@ export const deleteWorkspaceController = async (req, res) => {
   try {
     const workspaceId = req.params.id;
     const userId = req.user._id;
+
     const workspace = await deleteWorkspaceService(userId, workspaceId);
 
     return res
@@ -212,4 +217,17 @@ export const getUserWorkspaceController = async (req, res) => {
       .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
       .json(customErrorResponse(error));
   }
+};
+
+export const updateWorkspaceController = async (req, res) => {
+  try {
+    const workspaceId = req.params.id;
+    const data = { ...req.body };
+
+    delete data['channels'];
+    delete data['members'];
+    delete data['joinCode'];
+
+    const workspace = await updateWorkspaceService(workspaceId, data);
+  } catch (error) {}
 };
