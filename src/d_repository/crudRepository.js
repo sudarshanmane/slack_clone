@@ -6,12 +6,12 @@ export default function crudRepository(model) {
       let newDoc = await model.create(data);
       return newDoc;
     },
-    getAll: async function (limit, offset, populateOptions = []) {
+    getAll: async function (limit, offset, populateOptions = [], query = {}) {
       const docs = await model
-        .find({})
+        .find({ ...query })
         .limit(limit)
         .skip(offset)
-        .sort({ updatedAt: -1 })
+        .sort({ createdAt: -1 })
         .populate(populateOptions);
 
       return docs;

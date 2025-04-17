@@ -15,6 +15,9 @@ const channelSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+channelSchema.index({ name: 1, workspaceId: 1 }, { unique: true });
+channelSchema.index({ updatedAt: -1 });
+
 const Channel = mongoose.model('Channel', channelSchema);
 // Channel Refers to a group
 

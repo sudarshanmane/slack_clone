@@ -52,6 +52,7 @@ export const isAuthenticated = async (req, res, next) => {
         })
       );
     }
+
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json(internalServerErrorResponse(error));

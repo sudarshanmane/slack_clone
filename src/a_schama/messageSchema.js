@@ -28,5 +28,8 @@ export const messageScheam = mongoose.Schema(
   { timestamps: true }
 );
 
+messageScheam.index({ body: 'text' });
+messageScheam.index({ createdAt: -1 });
+
 const Message = mongoose.model('Message', messageScheam);
 export default Message;

@@ -1,18 +1,18 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { getChannelByChannelIdService } from '../c_service/channelService.js';
+import { getChannelMessagesByChannelIdService } from '../c_service/channelService.js';
 import {
   customErrorResponse,
   successReponse
 } from '../utils/common/customObjects.js';
 
-export const getChannelByChannelIdController = async (req, res) => {
+export const getChannelMessagesByChannelIdController = async (req, res) => {
   try {
     const workspaceId = req.params.workspaceId;
     const channelId = req.params.channelId;
     const userId = req.user._id;
 
-    const channel = await getChannelByChannelIdService(
+    const channelMessages = await getChannelMessagesByChannelIdService(
       workspaceId,
       userId,
       channelId
@@ -20,7 +20,9 @@ export const getChannelByChannelIdController = async (req, res) => {
 
     return res
       .status(StatusCodes.OK)
-      .json(successReponse(channel, 'Channel Details Fetched Successfully!'));
+      .json(
+        successReponse(channelMessages, 'Channel Details Fetched Successfully!')
+      );
   } catch (error) {
     return res
       .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)

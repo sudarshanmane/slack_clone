@@ -1,20 +1,13 @@
 import channelRepository from '../d_repository/channelRepository.js';
+import messageRepository from '../d_repository/messageRepository.js';
 import ClientError from '../utils/errors/clientErrors.js';
 import {
   isUserMemberOfWorkspace,
   isWorkspaceExistsFun
 } from '../utils/utils.js';
 
-export const getChannelByChannelIdService = async (
-  workspaceId,
-  userId,
-  channelId
-) => {
+export const isChannelExists = async (channelId) => {
   try {
-    const workspace = await isWorkspaceExistsFun(workspaceId);
-
-    isUserMemberOfWorkspace(workspace, userId);
-
     const channel = await channelRepository.findById(channelId, [
       { path: 'workspaceId', select: 'name' }
     ]);
@@ -27,6 +20,28 @@ export const getChannelByChannelIdService = async (
     }
 
     return channel;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getChannelMessagesByChannelIdService = async (
+  workspaceId,
+  userId,
+  channelId
+) => {
+  try {
+    const channel = await isChannelExists(channelId);
+
+    const workspace = await isWorkspaceExistsFun(workspaceId);
+
+    isUserMemberOfWorkspace(workspace, userId);
+
+    const messages = await messageRepository.getAll(20, 0, [], {
+      channelId: channelId
+    });
+
+    return { ...channel._doc, messages };
   } catch (error) {
     throw error;
   }
