@@ -46,7 +46,7 @@ workspaceRouter
   );
 
 workspaceRouter
-  .route('/get-member-workspace/:id')
+  .route('/get-member-workspace/:member_id')
   .get(isAuthenticated, getALLWorkSpaceByMemberIdController);
 
 workspaceRouter

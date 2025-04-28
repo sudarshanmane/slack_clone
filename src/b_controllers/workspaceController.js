@@ -22,7 +22,9 @@ export const getALLWorkSpaceController = async (req, res, next) => {
   try {
     const { limit = 10, offset = 0 } = req.query;
 
-    const users = await getALLWorkSpaceService(limit, offset);
+    const userId = req.user._id;
+
+    const users = await getALLWorkSpaceService(userId, limit, offset);
 
     return res.status(200).json({
       success: true,
@@ -152,8 +154,9 @@ export const getWorkSpaceByJoinCodeController = async (req, res, next) => {
 export const getWorkSpaceByIdController = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const userId = req.user._id;
 
-    const workspace = await getWorkSpaceByIdService(id);
+    const workspace = await getWorkSpaceByIdService(id, userId);
 
     return res
       .status(StatusCodes.OK)
@@ -169,7 +172,7 @@ export const getWorkSpaceByIdController = async (req, res, next) => {
 
 export const getALLWorkSpaceByMemberIdController = async (req, res) => {
   try {
-    const memberId = req.params.id;
+    const memberId = req.params.member_id;
 
     const workspaces = await findAllWorkspaceByMembersService(memberId);
 
@@ -223,11 +226,21 @@ export const updateWorkspaceController = async (req, res) => {
   try {
     const workspaceId = req.params.id;
     const data = { ...req.body };
+    const userId = req.user?._id;
 
     delete data['channels'];
     delete data['members'];
     delete data['joinCode'];
 
-    const workspace = await updateWorkspaceService(workspaceId, data);
-  } catch (error) {}
+    const workspace = await updateWorkspaceService(workspaceId, userId, data);
+    console.log('inside update ', workspace);
+    return res
+      .status(StatusCodes.CREATED)
+      .json(successReponse(workspace, 'Workspace Successfully Updatd!'));
+  } catch (error) {
+    console.log('error in update workspace', error);
+    return res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(customErrorResponse(error));
+  }
 };

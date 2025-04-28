@@ -9,7 +9,7 @@ import workspaceRouter from './workspaceRoutes.js';
 const v1Router = express.Router();
 
 v1Router.use('/users', userRouter);
-v1Router.use('/workspace', workspaceRouter);
+v1Router.use('/workspaces', workspaceRouter);
 v1Router.use('/channel', channelRouter);
 v1Router.use('/member', memberRouter);
 v1Router.use('/message', messageRouter);

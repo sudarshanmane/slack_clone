@@ -1,6 +1,7 @@
 // import email processor to initiate the process of sending email
 import './processor/mailProcessor.js';
 
+import cors from 'cors';
 import express, { urlencoded } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -21,6 +22,8 @@ io.on('connection', (socket) => {
   messageHandlers(io, socket);
   messageSocketHandlers(io, socket);
 });
+
+app.use(cors('*'));
 
 app.use(express.json());
 app.use(urlencoded({ extended: true }));

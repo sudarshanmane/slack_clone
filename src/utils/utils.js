@@ -40,6 +40,7 @@ export const isUserMemberOfWorkspace = (workspace, userId) => {
       statusCodes: StatusCodes.UNAUTHORIZED
     });
   }
+
   return true;
 };
 
@@ -69,8 +70,12 @@ export const verifyJwtToken = (token) => {
 };
 
 export const validateBcryptPassword = (password, bcryptedPassword) => {
-  const result = bcrypt.compareSync(password, bcryptedPassword);
-  return result;
+  try {
+    const result = bcrypt.compareSync(password, bcryptedPassword);
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const isUserAdminOfTheWorkspace = (workspace, userId, message) => {

@@ -12,7 +12,7 @@ import { validate } from '../../validators/zodValidator.js';
 
 const userRouter = express.Router();
 
-userRouter.post('/login', validate(signinSchema), userLoginController);
+userRouter.post('/signin', validate(signinSchema), userLoginController);
 userRouter.post('/signup', validate(userSignUpSchema), userSignupController);
 
 userRouter.route('/').get(isAuthenticated, getUsersController);

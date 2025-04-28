@@ -24,7 +24,8 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Password is required!']
+      required: [true, 'Password is required!'],
+      select: false
     },
     avatar: {
       type: String

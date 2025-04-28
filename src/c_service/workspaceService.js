@@ -16,12 +16,16 @@ import {
   isWorkspaceExistsFun
 } from '../utils/utils.js';
 
-export const getALLWorkSpaceService = async (limit, offset) => {
+export const getALLWorkSpaceService = async (userId, limit, offset) => {
   try {
-    const worspaceces = await workspaceRepository.getAll(limit, offset, [
-      { path: 'channels' },
-      { path: 'members' }
-    ]);
+    const worspaceces = await workspaceRepository.getAll(
+      limit,
+      offset,
+      [{ path: 'channels' }, { path: 'members' }],
+      {
+        'members.memberId': userId
+      }
+    );
     return worspaceces;
   } catch (error) {
     throw error;
@@ -175,15 +179,17 @@ export const getWorkSpaceByJoinCodeService = async (joinCode) => {
   }
 };
 
-export const getWorkSpaceByIdService = async (joinCode) => {
+export const getWorkSpaceByIdService = async (id, userId) => {
   try {
-    const workspace = await workspaceRepository.findById(joinCode);
+    const workspace = await workspaceRepository.findById(id);
     if (!workspace) {
       throw customErrorResponse({
         explanation: ['No workspace found!'],
         message: 'Workspace not found!'
       });
     }
+
+    isUserMemberOfWorkspace(workspace, userId);
 
     return workspace;
   } catch (error) {
@@ -203,11 +209,11 @@ export const findAllWorkspaceByMembersService = async (memberId) => {
   }
 };
 
-export const updateWorkspaceService = async (workspaceId, data) => {
+export const updateWorkspaceService = async (workspaceId,userId, data) => {
   try {
     const workspace = await isWorkspaceExistsFun(workspaceId);
 
-    isUserAdminOfTheWorkspace(workspace);
+    isUserAdminOfTheWorkspace(workspace, userId);
 
     const updatedWorkspace = await workspaceRepository.update(
       workspaceId,
@@ -216,7 +222,6 @@ export const updateWorkspaceService = async (workspaceId, data) => {
 
     return updatedWorkspace;
   } catch (error) {
-    console.log('error occurred in findAllWorkspaceByMembers', error);
     throw error;
   }
 };

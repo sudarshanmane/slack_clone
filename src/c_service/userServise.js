@@ -48,6 +48,8 @@ export const userLoginService = async (email, password) => {
 
     const checkPassword = validateBcryptPassword(password, userExists.password);
 
+    console.log('checkPassword', checkPassword);
+
     if (!checkPassword) {
       throw new ClientError({
         explanation: ['Invalid Data sent from the client'],

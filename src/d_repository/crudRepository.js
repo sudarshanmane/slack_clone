@@ -1,5 +1,3 @@
-import ClientError from '../utils/errors/clientErrors.js';
-
 export default function crudRepository(model) {
   return {
     create: async function (data) {
@@ -7,6 +5,7 @@ export default function crudRepository(model) {
       return newDoc;
     },
     getAll: async function (limit, offset, populateOptions = [], query = {}) {
+      console.log(query);
       const docs = await model
         .find({ ...query })
         .limit(limit)
@@ -17,16 +16,9 @@ export default function crudRepository(model) {
       return docs;
     },
     findById: async function (id, populateOptions) {
-      try {
-        let doc = await model.findById(id).populate(populateOptions);
+      let doc = await model.findById(id).populate(populateOptions);
 
-        return doc;
-      } catch (error) {
-        throw new ClientError({
-          explanation: 'Invalid details sent from the client!',
-          message: 'Invalid Channel details sent by user!'
-        });
-      }
+      return doc;
     },
     delete: async function (id) {
       const response = await model.findByIdAndDelete(id);

@@ -5,7 +5,7 @@ const userRepository = {
   ...crudRepository(User),
 
   getUserByEmail: async function (email) {
-    const userDoc = await User.findOne({ email });
+    const userDoc = await User.findOne({ email }).select('+password');
     return userDoc;
   },
 
