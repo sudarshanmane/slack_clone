@@ -181,7 +181,15 @@ export const getWorkSpaceByJoinCodeService = async (joinCode) => {
 
 export const getWorkSpaceByIdService = async (id, userId) => {
   try {
-    const workspace = await workspaceRepository.findById(id);
+    const workspace = await workspaceRepository.findById(id, [
+      {
+        path: 'channels',
+        select: 'name workspaceId',
+        options: {
+          sort: { createdAt: -1 }
+        }
+      }
+    ]);
     if (!workspace) {
       throw customErrorResponse({
         explanation: ['No workspace found!'],
@@ -209,7 +217,7 @@ export const findAllWorkspaceByMembersService = async (memberId) => {
   }
 };
 
-export const updateWorkspaceService = async (workspaceId,userId, data) => {
+export const updateWorkspaceService = async (workspaceId, userId, data) => {
   try {
     const workspace = await isWorkspaceExistsFun(workspaceId);
 

@@ -11,7 +11,7 @@ const channelSchema = new mongoose.Schema(
       ref: 'Workspace',
       required: [true, 'Workspace ID is required!']
     }
-  },
+  },  
   { timestamps: true }
 );
 
