@@ -16,6 +16,24 @@ import {
   isWorkspaceExistsFun
 } from '../utils/utils.js';
 
+const isWorkspaceExistByJoinCode = async (joinCode) => {
+  try {
+    const workspace =
+      await workspaceRepository.getWorkspaceByJoinCode(joinCode);
+
+    if (!workspace) {
+      throw new ClientError({
+        message: 'Invalid Join Code!',
+        explanation: 'Invalid details sent by the user!'
+      });
+    }
+
+    return workspace;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getALLWorkSpaceService = async (userId, limit, offset) => {
   try {
     const worspaceces = await workspaceRepository.getAll(
@@ -127,6 +145,61 @@ export const addMemberToWorkspaceService = async (
   }
 };
 
+export const addMemberToWorkspaceByJoinCodeService = async (
+  joinCode,
+  role,
+  memberId
+) => {
+  try {
+    const workspace = await isWorkspaceExistByJoinCode(joinCode);
+
+    console.log(workspace);
+
+    const isValidUser = await userRepository.findById(memberId);
+
+    console.log(isValidUser);
+
+    if (!isValidUser) {
+      throw new ClientError({
+        statusCode: StatusCodes.NOT_FOUND,
+        explanation: ['Provided incorrect member details!'],
+        message: 'Member not found!'
+      });
+    }
+
+    // isUserAdminOfTheWorkspace(workspace, userId);
+
+    const isUserAlreadyPartOfWorkspace = workspace.members.find(
+      (el) => el.memberId.toString() === memberId.toString()
+    );
+
+    if (isUserAlreadyPartOfWorkspace) {
+      throw new ClientError({
+        explanation: ['Invalid data sent from the client!'],
+        message: 'Member is already part of the workspace!',
+        statusCode: StatusCodes.FORBIDDEN
+      });
+    }
+
+    const updatedWorkspace = await workspaceRepository.addMemberToWorkspace(
+      workspace,
+      memberId,
+      role
+    );
+
+    console.log('updatedWorkspace', updatedWorkspace);
+
+    addEmailToMailQueue({
+      ...workspaceJoinMail(workspace.name),
+      to: isValidUser.email
+    });
+
+    return updatedWorkspace;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const addChannelToWorkspaceService = async (
   workSpaceId,
   channelName,
@@ -166,6 +239,7 @@ export const getWorkSpaceByJoinCodeService = async (joinCode) => {
   try {
     const workspace =
       await workspaceRepository.getWorkspaceByJoinCode(joinCode);
+
     if (!workspace) {
       throw customErrorResponse({
         explanation: ['No workspace found!'],
@@ -188,8 +262,16 @@ export const getWorkSpaceByIdService = async (id, userId) => {
         options: {
           sort: { createdAt: -1 }
         }
+      },
+      {
+        path: 'members.memberId'
+        // select: 'name image'
+        // options: {
+        //   sort: { createdAt: -1 }
+        // }
       }
     ]);
+
     if (!workspace) {
       throw customErrorResponse({
         explanation: ['No workspace found!'],

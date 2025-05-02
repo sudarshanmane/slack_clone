@@ -30,7 +30,10 @@ export const isWorkspaceExistsFun = async (workspaceId) => {
 
 export const isUserMemberOfWorkspace = (workspace, userId) => {
   const isMember = workspace.members.find((el) => {
-    return el?.memberId.toString() === userId.toString();
+    return (
+      el?.memberId.toString() === userId.toString() ||
+      el?.memberId._id.toString() === userId.toString()
+    );
   });
 
   if (!isMember) {

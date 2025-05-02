@@ -2,6 +2,7 @@ import express from 'express';
 
 import {
   addChannelToWorkspaceController,
+  addMemberToWorkspaceByJoinCodeController,
   addMemberToWorkspaceController,
   createWorkspceSpaceController,
   deleteWorkspaceController,
@@ -27,7 +28,7 @@ workspaceRouter
 
 workspaceRouter
   .route('/joinCode/:joinCode')
-  .get(isAuthenticated, getWorkSpaceByJoinCodeController);
+  .put(isAuthenticated, addMemberToWorkspaceByJoinCodeController);
 
 workspaceRouter
   .route('/:id/add-channel')

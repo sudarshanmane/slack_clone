@@ -29,3 +29,16 @@ export const getChannelMessagesByChannelIdController = async (req, res) => {
       .json(customErrorResponse(error));
   }
 };
+
+// export const getChannelById = async (req, res) => {
+//   try {
+//     const channelId = req.params.channelId;
+//     const user = req.user._id;
+
+//     const response = getChannelByIdService(channelId);
+//   } catch (error) {
+//     return res
+//       .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+//       .json(customErrorResponse(error));
+//   }
+// };

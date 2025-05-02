@@ -4,6 +4,7 @@ import './processor/mailProcessor.js';
 import cors from 'cors';
 import express, { urlencoded } from 'express';
 import { createServer } from 'http';
+import { StatusCodes } from 'http-status-codes';
 import { Server } from 'socket.io';
 
 import { messageHandlers } from './b_controllers/channelSocketController.js';
@@ -36,6 +37,13 @@ app.use('/', (req, res, next) => {
 
 app.use('/api', apiRouter);
 app.use('/ui', bullServerAdapter.getRouter());
+
+app.use('/', function (req, res) {
+  return res.status(StatusCodes.NOT_FOUND).json({
+    message: `Can't find path ${req.originalUrl} on this server!`,
+    success: false
+  });
+});
 
 server.listen(PORT, () => {
   console.log(`server running on port ${PORT}`);

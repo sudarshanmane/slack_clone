@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import {
   addChannelToWorkspaceService,
+  addMemberToWorkspaceByJoinCodeService,
   addMemberToWorkspaceService,
   createWorkspceSpaceService,
   deleteWorkspaceService,
@@ -75,6 +76,34 @@ export const addMemberToWorkspaceController = async (req, res, next) => {
       memberId,
       role,
       userId
+    );
+
+    return res
+      .status(StatusCodes.OK)
+      .json(
+        successReponse(workspace, 'Member add to the Workspace Successfully!')
+      );
+  } catch (error) {
+    return res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(customErrorResponse(error));
+  }
+};
+
+export const addMemberToWorkspaceByJoinCodeController = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const joinCode = req.params.joinCode;
+    const memberId = req.user._id;
+    const role = 'member';
+
+    const workspace = await addMemberToWorkspaceByJoinCodeService(
+      joinCode,
+      role,
+      memberId
     );
 
     return res
