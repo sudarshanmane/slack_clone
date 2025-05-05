@@ -1,6 +1,4 @@
 import messageRepository from '../d_repository/messageRepository.js';
-import { isAuthenticated } from '../middlewares/authMiddleware.js';
-import { customErrorResponse } from '../utils/common/customObjects.js';
 import {
   isUserMemberOfWorkspace,
   isWorkspaceExistsFun
@@ -21,7 +19,7 @@ export const getAllMessagesOfAchannelAndWorkspaceService = async (
     const workspace = await isWorkspaceExistsFun(channel.workspaceId);
 
     isUserMemberOfWorkspace(workspace, userId);
-    e;
+
     const channelMessages = await messageRepository.getAll(
       limit,
       offset,

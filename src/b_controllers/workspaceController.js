@@ -191,11 +191,12 @@ export const getWorkSpaceByIdController = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json(successReponse(workspace, 'Workspace fetched successfully!'));
   } catch (error) {
-    console.log('Error occurred while getting the workspace by name', error);
+    // console.log('Error occurred while getting the workspace by name', error);
+    // return res
+    //   .status(error.StatusCodes || StatusCodes.INTERNAL_SERVER_ERROR)
+    // .json(customErrorResponse(error));
 
-    return res
-      .status(error.StatusCodes || StatusCodes.INTERNAL_SERVER_ERROR)
-      .json(customErrorResponse(error));
+    throw error;
   }
 };
 

@@ -98,3 +98,9 @@ export const isUserAdminOfTheWorkspace = (workspace, userId, message) => {
 
   return reponse;
 };
+
+export const catchAsync = (fn) => {
+  return fn(req, res, next).catch((error) => {
+    throw error;
+  });
+};

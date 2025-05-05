@@ -8,6 +8,7 @@ import workspaceRepository from '../d_repository/workspaceRepository.js';
 import { addEmailToMailQueue } from '../producer/mailQueueProducer.js';
 import { customErrorResponse } from '../utils/common/customObjects.js';
 import { workspaceJoinMail } from '../utils/common/mailObject.js';
+import { AppError } from '../utils/errors/appError.js';
 import ClientError from '../utils/errors/clientErrors.js';
 import ValidationError from '../utils/errors/validationErrors.js';
 import {
@@ -80,6 +81,7 @@ export const createWorkspceSpaceService = async (workspaceObj, userId) => {
     return updatedWorkspace;
   } catch (error) {
     console.log('error while creating tbe workspace!', error);
+
     if (error.name === 'ValidationError') {
       throw new ValidationError({ error: error.errors }, error.message);
     } else if (error.name === 'MongoServerError') {
@@ -264,18 +266,15 @@ export const getWorkSpaceByIdService = async (id, userId) => {
         }
       },
       {
-        path: 'members.memberId'
-        // select: 'name image'
-        // options: {
-        //   sort: { createdAt: -1 }
-        // }
+        path: 'members.memberId',
+        select: 'name image'
       }
     ]);
 
     if (!workspace) {
-      throw customErrorResponse({
-        explanation: ['No workspace found!'],
-        message: 'Workspace not found!'
+      throw new AppError({
+        message: 'Workspace not found!',
+        statusCode: 400
       });
     }
 

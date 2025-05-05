@@ -27,8 +27,9 @@ export const getAllMessagesOfAchannelAndWorkspaceController = async (
       .status(StatusCodes.OK)
       .json(successReponse(messages, 'Messages fetched successfully!'));
   } catch (error) {
-    return res
-      .status(error.StatusCode || StatusCodes.INTERNAL_SERVER_ERROR)
-      .json(customErrorResponse(error));
+    // return res
+    //   .status(error.StatusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+    //   .json(customErrorResponse(error));
+    throw error;
   }
 };

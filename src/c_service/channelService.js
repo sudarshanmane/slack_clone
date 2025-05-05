@@ -13,7 +13,7 @@ export const isChannelExists = async (channelId) => {
     ]);
 
     if (!channel) {
-      throw ClientError({
+      throw new ClientError({
         explanation: 'Invalid data sent by client!',
         message: 'Channel does not exists!'
       });

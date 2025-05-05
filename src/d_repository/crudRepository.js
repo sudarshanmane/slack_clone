@@ -5,7 +5,6 @@ export default function crudRepository(model) {
       return newDoc;
     },
     getAll: async function (limit, offset, populateOptions = [], query = {}) {
-      console.log(query);
       const docs = await model
         .find({ ...query })
         .limit(limit)

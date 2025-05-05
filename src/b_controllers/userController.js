@@ -13,7 +13,6 @@ import {
 } from '../c_service/userServise.js';
 import {
   customErrorResponse,
-  internalServerErrorResponse,
   successReponse
 } from '../utils/common/customObjects.js';
 import ClientError from '../utils/errors/clientErrors.js';
@@ -32,6 +31,21 @@ export const userLoginController = async (req, res, next) => {
     }
 
     const response = await userLoginService(email, password);
+
+    const cookieOptions = {
+      maxAge: process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000, // in ms
+      httpOnly: true,
+      secure: false,
+      sameSite: 'Lax'
+
+      // sameSite: isProd ? 'None' : 'Lax',
+      // secure: process.env.NODE_ENV === 'production'
+      // httpOnly: true
+    };
+
+    res.cookie('jwt', response?.token, cookieOptions);
+
+    res.cookie('user', JSON.stringify(response?.user), cookieOptions);
 
     return res.status(200).json({
       success: true,
@@ -57,13 +71,13 @@ export const userSignupController = async (req, res, next) => {
       .status(StatusCodes.CREATED)
       .json(successReponse(response, 'User Created Successfully!'));
   } catch (error) {
-    if (error.statusCode) {
-      return res.status(error.statusCode).json(customErrorResponse(error));
-    }
+    // if (error.statusCode) {
+    //   return res.status(error.statusCode).json(customErrorResponse(error));
+    // }
 
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json(internalServerErrorResponse(error));
+    throw error;
+    // .status(StatusCodes.INTERNAL_SERVER_ERROR)
+    // .json(internalServerErrorResponse(error));
   }
 };
 
@@ -128,7 +142,6 @@ export const getUsersController = async (req, res, next) => {
 export const getUserByIdController = async (req, res, next) => {
   try {
     const { id } = req.params;
-
     const users = await findUserByIdService(id);
 
     return res.status(200).json({

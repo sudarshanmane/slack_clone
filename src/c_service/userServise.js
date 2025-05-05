@@ -1,9 +1,9 @@
 import { StatusCodes } from 'http-status-codes';
 
 import ClientError from '../utils/errors/clientErrors.js';
-import ValidationError from '../utils/errors/validationErrors.js';
 import { generateJwtToken, validateBcryptPassword } from '../utils/utils.js';
 import userRepository from './../d_repository/userRepository.js';
+import { AppError } from './../utils/errors/appError.js';
 
 export const signUpService = async (userObject) => {
   try {
@@ -21,14 +21,14 @@ export const signUpService = async (userObject) => {
       token
     };
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      throw new ValidationError({ error: error.errors }, error.message);
-    } else if (error.name === 'MongooseError') {
-      throw new ValidationError(
-        { error: ['A user with the same email or username alread exists!'] },
-        'A user with the same email or username alread exists!'
-      );
-    }
+    // if (error.name === 'ValidationError') {
+    //   throw new ValidationError({ error: error.errors }, error.message);
+    // } else if (error.name === 'MongooseError') {
+    //   throw new ValidationError(
+    //     { error: ['A user with the same email or username alread exists!'] },
+    //     'A user with the same email or username alread exists!'
+    //   );
+    // }
 
     throw error;
   }
@@ -39,16 +39,10 @@ export const userLoginService = async (email, password) => {
     const userExists = await userRepository.getUserByEmail(email);
 
     if (!userExists) {
-      throw new ClientError({
-        explanation: ['Invalid Details'],
-        message: 'No Registered User found with this email',
-        StatusCode: StatusCodes.NOT_FOUND
-      });
+      throw new AppError('No Registered User found with this email', 400);
     }
 
     const checkPassword = validateBcryptPassword(password, userExists.password);
-
-    console.log('checkPassword', checkPassword);
 
     if (!checkPassword) {
       throw new ClientError({

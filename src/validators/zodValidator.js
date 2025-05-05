@@ -8,12 +8,12 @@ export const validate = (schema) => {
       await schema.parseAsync(req.body);
       next();
     } catch (error) {
-      console.log('------- validation error in zod -------', error);
-
       const exlplations = [];
 
       error.errors.forEach((el) => {
-        exlplations.push(el.message);
+        if (el.message === 'Required') {
+          exlplations.push(`${el.path} ${el.message}`);
+        } else exlplations.push(el.message);
       });
 
       res.status(StatusCodes.BAD_REQUEST).json(
